@@ -3,8 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { jwtVerify } from 'jose';
 
 export async function proxy(request: NextRequest) {
-const role = request.cookies.get('role'); // use NextRequest in middleware to access cookies
-    // console.log("role: " + role?.value);
+    // console.log(request.cookies);
+
+    const role = request.cookies.get('role'); // use NextRequest in middleware to access cookies
+    console.log("role: " + role?.value);
+
+    const refreshToken = request.cookies.get('refreshToken'); // use NextRequest in middleware to access cookies
+    console.log("refreshToken: " + refreshToken?.value);
+
+    const login = !!refreshToken;
+    // console.log("login: " + login);
 
     let isLoggedIn = false; // Default to false
     if (role?.value) {
@@ -14,7 +22,7 @@ const role = request.cookies.get('role'); // use NextRequest in middleware to ac
 
     let isAdmin = false; // Default to false
     // const roles = role?.value || '';
-    if (role?.value.includes('ROLE_ADMIN')) {
+    if (role?.value.includes('ROLE_ADMIN') && login) {
         isAdmin = true; // If roles include 'ROLE_ADMIN', user is admin
     }
     // console.log("isAdmin: " + isAdmin);
@@ -31,19 +39,19 @@ const role = request.cookies.get('role'); // use NextRequest in middleware to ac
     );
 
     // If the user is trying to access a protected route without a token
-    if (isProtected && !isLoggedIn) {
+    if (isProtected && !login) {
         return NextResponse.redirect(new URL('/login-client', request.url));
     }
 
     const isAdminDash = request.nextUrl.pathname.startsWith('/admin');
     // If the user w/ token is trying to access the admin dashboard without admin roles
-    if (isLoggedIn && isAdminDash && !isAdmin) {
+    if (login && isAdminDash && !isAdmin) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     const isLoginPage = request.nextUrl.pathname.startsWith('/login-client');
     // If the user is trying to access the login page while already logged in
-    if (isLoginPage && isLoggedIn) {
+    if (isLoginPage && login) {
         if (isAdmin) {        //Or Redirect to admin dashboard if the user has admin roles
             return NextResponse.redirect(new URL('/admin', request.url));
         }
@@ -53,7 +61,7 @@ const role = request.cookies.get('role'); // use NextRequest in middleware to ac
 
     const isRegisterPage = request.nextUrl.pathname.startsWith('/register-client');
     // If the user is trying to access the register page while already logged in
-    if (isRegisterPage && isLoggedIn) {
+    if (isRegisterPage && login) {
         if (isAdmin) {        //Or Redirect to admin dashboard if the user has admin roles
             return NextResponse.redirect(new URL('/admin', request.url));
         }

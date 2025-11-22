@@ -15,7 +15,7 @@ const AuthButtons = () => {
         logout();
         setIsPending(false);
         // router.replace('/');
-        router.refresh();
+        // router.refresh();
     };
 
     return (

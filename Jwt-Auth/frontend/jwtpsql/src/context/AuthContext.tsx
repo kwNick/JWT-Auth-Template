@@ -438,6 +438,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // On mount, attempt to refresh access token automatically
 
   useEffect(() => {
+    // router.refresh(); //apparently this was causing navigation to cancel, Dont do this ever?...
     (async () => {
       await fetchProfile();
       setLoading(false);
@@ -446,7 +447,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    
+    // router.refresh();
     if(role?.includes("ROLE_ADMIN")){
       // Pros: Predictable order, useful if later calls depend on earlier results.
       // (async () => {  // Runs sequentially: Each await pauses execution until the previous function finishes.
@@ -484,7 +485,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         })();
       }
-    router.refresh()
+    
   }, [role]);
 
   return (
